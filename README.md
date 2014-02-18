@@ -1,10 +1,7 @@
-# sicp
+sicp
+====
 
-A Clojure library designed to ... well, that part is up to you.
-
-## Usage
-
-FIXME
+Selected SICP Exercises in Clojure
 
 ## License
 
