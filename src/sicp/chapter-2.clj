@@ -57,6 +57,16 @@
 
 ;; -----------------------------------------------------------------------------
 ;; Exercise 2.20
+;; Linear recursive.
+(defn same-parity [& items]
+  (letfn [(filter-parity [x match-evens]
+            (cond
+             (empty? x) x
+             (= (even? (first x)) match-evens) (cons (first x) (filter-parity (rest x) match-evens))
+             :else (filter-parity (rest x) match-evens)))]
+    (filter-parity items (even? (first items)))))
+
+;; Linear iterative.
 (defn same-parity [& items]
   (letfn [(filter-parity [x match-evens matches]
             (if (empty? x) matches
@@ -65,16 +75,17 @@
                        (if (= (even? (first x)) match-evens) (cons (first x) matches) matches))))]
     (reverse (filter-parity items (even? (first items)) '())))) ;; reverse feels like cheating.
 
+;; Better linear iterative.
 (defn same-parity [& items]
   (let [match-evens (even? (first items))]
     (filter (fn [x] (= (even? x) match-evens)) items)))
 
 ;; -----------------------------------------------------------------------------
 ;; Exercise 2.27
-(defn deep-reverse [tree]
-  (if (list? tree)
-    (reverse (map deep-reverse tree))
-    tree))
+(defn deep-reverse [items]
+  (if (not (list? items))
+    items
+    (reverse (map deep-reverse items))))
 
 ;; -----------------------------------------------------------------------------
 ;; Exercise 2.30
@@ -87,9 +98,9 @@
 ;; -----------------------------------------------------------------------------
 ;; Exercise 2.31
 (defn tree-map [f tree]
-  (if (list? tree)
-    (map (fn [t] (tree-map f t)) tree)
-    (f tree)))
+  (if (not (list? tree))
+    (f tree)
+    (map (fn [t] (tree-map f t)) tree)))
 
 ;; -----------------------------------------------------------------------------
 ;; Exercise 2.40
@@ -98,5 +109,5 @@
             (cond 
              (< i 2) results
              (< j 1) (recur (- i 1) (- i 2) results)
-             :else (recur i (dec j) (cons (list i j) results))))]
+             :else (recur i (- j 1) (cons (list i j) results))))]
     (iter-pairs n (- n 1) '())))
