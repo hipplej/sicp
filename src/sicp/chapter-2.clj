@@ -113,7 +113,7 @@
 ;; Exercise 2.40
 (defn unique-pairs [n]
   (letfn [(iter-pairs [i j results]
-            (cond 
+            (cond
              (< i 2) results
              (< j 1) (recur (- i 1) (- i 2) results)
              :else (recur i (- j 1) (cons (list i j) results))))]
