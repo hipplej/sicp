@@ -1,0 +1,34 @@
+Some notes on sections 2.1 and 2.2
+
+Building abstractions by combining data objects to form compound data:
+  * Elevate conceptual level at which we can design programs
+    - You can design using concepts that are much closer to the problem domain.
+  * Increase modularity of design
+    - Isolate parts of program where data objects are defined from those where data objects are used. This allows us to change the
+      implementation of the data objects without having to change anything in the places where they are used.
+    - Abstraction barriers
+  * Enhance the expressive power of the language
+    - Instead of talking about pairs of numbers that happen to represent a rational number, you can talk about rational numbers
+      as if they are natively supported by the language, ignoring all details as to how they are implemented.
+
+All this frees up brainpower that can be better spent solving the actual problem rather than mucking about in implementation details.
+
+Interfaces hide the implementation
+  * In many examples in the chapter the implementation can be changed quite drastically as long as the 'selector' and
+    'constructor' interfaces are unchanged. Exercises 2.4 and 2.5.
+
+To build abstractions you need some sort of "glue" to associate data objects with one another.
+  * Using procedures (with help from closures) to associate data elements (function parameters)
+  * Using pairs to associate data elements, sometimes in hierarchical ways.
+
+Closure property: an operation for combining data objects satisfies the closure property if the results of combining things with that operation can themselves be combined using the same operation. Do not confuse with the other meaning of closure, which has to do with storing references to non-local variables.
+
+Introduced to various sequence operators which are commonly found in functional languages: accumulate, enumerate, filter, map, foldl, foldr.
+
+In the painter example we make use of combinations of painters to represent complex image manipulation. These combinations are just painters themselves though, and can hence be used by any function that operates on painters. The implementation of the painters can change and as long as the interface remains the same the higher order painters and functions that use painters don't really need to worry about it.
+
+Statified Design:
+  * A complex system should be structured as a sequence of levels that are described using a sequence of languages. Each level
+    is constructed by combining parts that are considered primitive at that level, and the parts constructed at each level
+    are used as primitives at the next level.
+  * Bottom-up design lends itself very well to this. (http://www.paulgraham.com/progbot.html)
