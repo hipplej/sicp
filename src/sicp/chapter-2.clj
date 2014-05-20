@@ -41,40 +41,58 @@
 
 ;; -----------------------------------------------------------------------------
 ;; Exercise 2.17
-(defn last-pair [x]
+(defn last-pair [items]
   (cond
-   (empty? x) (throw (Exception. "Argument must not be empty"))
-   (empty? (rest x)) x
-   :else (recur (rest x))))
+   (empty? items) (throw (Exception. "Argument must not be empty"))
+   (empty? (rest items)) items
+   :else (recur (rest items))))
 
 ;; -----------------------------------------------------------------------------
 ;; Exercise 2.18
-(defn my-reverse [x]
-  (letfn [(rev-iter [l result]
-            (if (empty? l) result
-                (recur (rest l) (cons (first l) result))))]
-    (rev-iter x '())))
+;; Linear iterative.
+(defn my-reverse [items]
+  (letfn [(rev-iter [sub-items result]
+            (if (empty? sub-items) result
+                (recur (rest sub-items) (cons (first sub-items) result))))]
+    (rev-iter items '())))
 
 ;; -----------------------------------------------------------------------------
 ;; Exercise 2.20
+;; Linear recursive.
 (defn same-parity [& items]
-  (letfn [(filter-parity [x match-evens matches]
-            (if (empty? x) matches
-                (recur (rest x)
-                       match-evens
-                       (if (= (even? (first x)) match-evens) (cons (first x) matches) matches))))]
-    (reverse (filter-parity items (even? (first items)) '())))) ;; reverse feels like cheating.
+  (letfn [(matches-parity [item]
+            (= (even? (first items)) (even? item)))
+          (filter-parity [sub-items]
+            (cond
+             (empty? sub-items) sub-items
+             (matches-parity (first sub-items)) (cons (first sub-items) (filter-parity (rest sub-items)))
+             :else (filter-parity (rest sub-items))))]
+    (filter-parity items)))
 
+;; Linear iterative.
 (defn same-parity [& items]
-  (let [match-evens (even? (first items))]
-    (filter (fn [x] (= (even? x) match-evens)) items)))
+  (letfn [(matches-parity [item]
+            (= (even? (first items)) (even? item)))
+          (filter-parity [sub-items matches]
+            (if (empty? sub-items) matches
+                (recur (rest sub-items)
+                       (if (matches-parity (first sub-items))
+                         (cons (first sub-items) matches)
+                         matches))))]
+    (reverse (filter-parity items '())))) ;; reverse feels like cheating.
+
+;; Better linear iterative.
+(defn same-parity [& items]
+  (letfn [(matches-parity [item]
+            (= (even? (first items)) (even? item)))]
+    (filter matches-parity items)))
 
 ;; -----------------------------------------------------------------------------
 ;; Exercise 2.27
-(defn deep-reverse [tree]
-  (if (list? tree)
-    (reverse (map deep-reverse tree))
-    tree))
+(defn deep-reverse [items]
+  (if (not (list? items))
+    items
+    (reverse (map deep-reverse items))))
 
 ;; -----------------------------------------------------------------------------
 ;; Exercise 2.30
@@ -87,16 +105,16 @@
 ;; -----------------------------------------------------------------------------
 ;; Exercise 2.31
 (defn tree-map [f tree]
-  (if (list? tree)
-    (map (fn [t] (tree-map f t)) tree)
-    (f tree)))
+  (if (not (list? tree))
+    (f tree)
+    (map (fn [t] (tree-map f t)) tree)))
 
 ;; -----------------------------------------------------------------------------
 ;; Exercise 2.40
 (defn unique-pairs [n]
   (letfn [(iter-pairs [i j results]
-            (cond 
+            (cond
              (< i 2) results
              (< j 1) (recur (- i 1) (- i 2) results)
-             :else (recur i (dec j) (cons (list i j) results))))]
+             :else (recur i (- j 1) (cons (list i j) results))))]
     (iter-pairs n (- n 1) '())))
