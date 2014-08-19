@@ -7,10 +7,11 @@
 ;; This is the list of primitive procedures that are supported in our language.
 (def primitive-procedures
   (list
-   (list 'first first)
-   (list 'rest rest)
+   (list 'car first)
+   (list 'cdr rest)
    (list 'cons cons)
-   (list 'empty? empty?)
+   ;; I think Scheme treats nil and '() as the same.
+   (list 'nil? #(or (nil? %1) (and (seq? %1) (empty? %1))))
    (list '+ +)
    (list '- -)
    (list '* *)
