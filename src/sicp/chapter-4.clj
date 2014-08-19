@@ -1,6 +1,7 @@
 (ns sicp.chapter-4
   (:require [clojure.repl :refer :all])
-  (:refer-clojure :rename {eval core-eval}))
+  (:refer-clojure :rename {eval core-eval
+                           apply core-apply}))
 
 (defn eval
   "Evaluates the expression in the context of the given environment."
@@ -16,7 +17,7 @@
                   (lambda-parameters exp)
                   (lambda-body exp)
                   env)
-   (begin? exp) (eval-sequence (begin-actions exp) env)
+   (do? exp) (eval-sequence (do-actions exp) env)
    (cond? exp) (eval (cond->if exp) env)
    (application? exp) (apply (eval (operator exp) env)
                              (list-of-values (operands exp) env))
@@ -180,12 +181,12 @@
   [predicate consequent alternative]
   (list 'if predicate consequent alternative))
 
-(defn begin?
-  "Determines whether the expression is a begin block."
-  (tagged-list? exp 'begin))
+(defn do?
+  "Determines whether the expression is a do block."
+  (tagged-list? exp 'do))
 
-(defn begin-actions
-  "Returns the actions part of a begin block."
+(defn do-actions
+  "Returns the actions part of a do block."
   [exp]
   (rest exp))
 
@@ -203,3 +204,112 @@
   "Returns all expressions after the first expression in a sequence of expressions."
   [exps]
   (rest (exps)))
+
+(defn sequence->exp
+  "Transforms a sequence of expressions into a single expression."
+  [exps]
+  (cond
+   (empty? exps) exps
+   (last-exp? exps) (first-exp exps)
+   :else (make-do exps)))
+
+(defn make-do
+  "Constructs a do block that encloses a sequence of expressions."
+  [exps]
+  (cons 'do exps))
+
+(defn application?
+  "Determines whether the expression is a procedure application."
+  [exp]
+  (list? exp))
+
+(defn operator
+  "Returns the operator of the procedure application."
+  [exp]
+  (first exp))
+
+(defn operands
+  "Returns the operands of the procedure application."
+  [exp]
+  (rest exp))
+
+(defn no-operands?
+  "Returns whether there are no operands remaining in the list of operands."
+  [ops]
+  (empty? ops))
+
+(defn first-operand
+  "Returns the first operand in the list of operands."
+  [ops]
+  (first ops))
+
+(defn rest-operands
+  "Returns all operands after the first operand in the list of operands."
+  [ops]
+  (rest ops))
+
+(defn cond?
+  "Returns whether the expression is a cond block."
+  [exp]
+  (tagged-list? exp 'cond))
+
+(defn cond-clauses
+  "Returns the clauses of the cond block."
+  [exp]
+  (rest exp))
+
+(defn cond-else-clause?
+  "Returns whether the specified cond clause is an else clause."
+  [clause]
+  (= (cond-predicate clause) :else))
+
+(defn cond-predicate
+  "Returns the predicate of the specified cond clause."
+  [clause]
+  (first clause))
+
+(defn cond-actions
+  "Returns the actions of the specified cond clause."
+  [clause]
+  (rest clause))
+
+(defn cond->if
+  "Converts a cond block into a series of nested if statements."
+  [exp]
+  (letfn [(iter [rem-clauses]
+            (let [first-clause (first rem-clauses)
+                  rest-clauses (rest rem-clauses)]
+              (cond
+               (cond-else-clause? first-clause) (if (empty? rest-clauses)
+                                                  (sequence->exp (cond-actions first))
+                                                  (throw (Exception. ":else clause isn't in final slot.")))
+               (empty? rest-clauses) 'false
+               :else (make-if (cond-predicate first-clause)
+                         (sequence->exp (cond-actions first-clause))
+                         (recur rest-clauses)))))]
+    (iter exp)))
+
+(defn make-procedure
+  "Constructs a procedure."
+  [parameters body env]
+  (list 'procedure parameters body env))
+
+(defn compount-procedure?
+  "Determines whether the procedure is a compount procedure."
+  [proc]
+  (tagged-list? proc 'procedure))
+
+(defn procedure-parameters
+  "Returns the parameters of the given procedure."
+  [proc]
+  (first (rest proc)))
+
+(defn procedure-body
+  "Returns the body of the given procedure."
+  [proc]
+  (first (rest (rest proc))))
+
+(defn procedure-environment
+  "Returns the environment of the given procedure."
+  [proc]
+  (first (rest (rest (rest proc)))))
