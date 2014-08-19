@@ -4,7 +4,7 @@
                            apply core-apply}))
 
 (defn eval
-  "Evaluates the expression in the context of the given environment."
+  "Evaluates the expression in the context of the environment."
   [exp env]
   (cond
    (self-evaluating? exp) exp
@@ -24,7 +24,7 @@
    :else (throw (Exception. (format  "Unknown expression type: %s" exp)))))
 
 (defn apply
-  "Executes the procedure with the given arguments."
+  "Executes the procedure with the arguments."
   [procedure arguments]
   (cond
    (primitive-procedure? procedure) (apply-primitive-procedure procedure arguments)
@@ -38,7 +38,7 @@
 
 (defn list-of-values
   "Return the list of values that is the result of evaluating the list of expressions
-  in the given environment."
+  in the environment."
   [exps env]
   (letfn [(iter [rem-exps result]
             (if (no-operands? rem-exps)
@@ -47,7 +47,7 @@
   (iter exps '()))
 
 (defn eval-if
-  "Evaluates the predicate part of an if statement in the given environment.
+  "Evaluates the predicate part of an if statement in the environment.
   If the result is true, it will evaluate the consequent, otherwise it evaluates
   the alternative."
   [exp env]
@@ -56,7 +56,7 @@
     (eval (if-alternative exp) env)))
 
 (defn eval-sequence
-  "Evaluates a sequence of expressions in the given environment and returns value
+  "Evaluates a sequence of expressions in the environment and returns value
   of the final expression."
   [exps env]
   (letfn [(iter [rem-exps]
@@ -66,14 +66,14 @@
                 (recur (rest-exps rem-exps)))))]))
 
 (defn eval-assignment
-  "Evaluates the given expression and binds it to the specified variable in the given environment.
+  "Evaluates the expression and binds it to the variable in the environment.
   Returns 'ok on success."
   [exp env]
   (set-variable-value! (assignment-variable exp) (eval (assignment-value exp) env) env)
   'ok)
 
 (defn eval-definition
-  "Evaluates the given expression and creates a new variable bound to that value in the given environement.
+  "Evaluates the expression and creates a new variable bound to that value in the environement.
   Returns 'ok on success."
   [exp env]
   (define-variable! (definition-variable exp) (eval (definition-value exp) env) env)
@@ -95,7 +95,7 @@
   (tagged-list? exp 'quote))
 
 (defn tagged-list?
-  "Returns whether the expression is a list and begins with the specified symbol."
+  "Returns whether the expression is a list and begins with the symbol."
   [exp tag]
   (and (list? exp) (= (first exp) tag)))
 
@@ -139,17 +139,17 @@
   (tagged-list? exp 'lambda))
 
 (defn lambda-parameters
-  "Returns the parameters of the given lambda expression."
+  "Returns the parameters of the lambda expression."
   [exp]
   (first (rest exp)))
 
 (defn lambda-body
-  "Returns the body of the given lambda expression."
+  "Returns the body of the lambda expression."
   [exp]
   (rest (rest exp)))
 
 (defn make-lambda
-  "Constructs a lambda expression from the given parameters and body."
+  "Constructs a lambda expression from the parameters and body."
   [parameters body]
   (cons 'lambda (cons parameters body)))
 
@@ -177,7 +177,7 @@
     'false))
 
 (defn make-if
-  "Contructs an if statement from the specified parts."
+  "Contructs an if statement from the parts."
   [predicate consequent alternative]
   (list 'if predicate consequent alternative))
 
@@ -191,7 +191,7 @@
   (rest exp))
 
 (defn last-exp?
-  "Returns whether there is only one more expression in the given sequence of expressions."
+  "Returns whether there is only one more expression in the sequence of expressions."
   [exps]
   (empty? (rest exps)))
 
@@ -259,17 +259,17 @@
   (rest exp))
 
 (defn cond-else-clause?
-  "Returns whether the specified cond clause is an else clause."
+  "Returns whether the cond clause is an else clause."
   [clause]
   (= (cond-predicate clause) :else))
 
 (defn cond-predicate
-  "Returns the predicate of the specified cond clause."
+  "Returns the predicate of the cond clause."
   [clause]
   (first clause))
 
 (defn cond-actions
-  "Returns the actions of the specified cond clause."
+  "Returns the actions of the cond clause."
   [clause]
   (rest clause))
 
@@ -300,16 +300,52 @@
   (tagged-list? proc 'procedure))
 
 (defn procedure-parameters
-  "Returns the parameters of the given procedure."
+  "Returns the parameters of the procedure."
   [proc]
   (first (rest proc)))
 
 (defn procedure-body
-  "Returns the body of the given procedure."
+  "Returns the body of the procedure."
   [proc]
   (first (rest (rest proc))))
 
 (defn procedure-environment
-  "Returns the environment of the given procedure."
+  "Returns the environment of the procedure."
   [proc]
   (first (rest (rest (rest proc)))))
+
+(defn enclosing-environment
+  "Returns the environment that encloses the environment."
+  [env]
+  (rest env))
+
+(defn first-frame
+  "Returns the first frame of the environment."
+  [env]
+  (first env))
+
+(def the-empty-environment
+  '())
+
+(defn make-frame
+  "Constructs an environment frame where the variable
+  are bound to the values."
+  [variables values]
+  (zipmap variables values))
+
+(defn frame-variables
+  "Returns the variables that are bound in the frame."
+  [frame]
+  (keys frame))
+
+(defn frame-values
+  "Returns the values to which variable are bound in the frame."
+  [frame]
+  (vals frame))
+
+(defn add-binding-to-frame
+  "Binds the value to the variable in the frame."
+  [variable value frame]
+  ;; Not sure what to do here yet...
+  )
+
